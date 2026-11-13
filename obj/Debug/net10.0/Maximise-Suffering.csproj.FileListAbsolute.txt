@@ -1,0 +1,15 @@
+D:\work\code\challenges\Maximise-Suffering\bin\Debug\net10.0\Maximise-Suffering.exe
+D:\work\code\challenges\Maximise-Suffering\bin\Debug\net10.0\Maximise-Suffering.deps.json
+D:\work\code\challenges\Maximise-Suffering\bin\Debug\net10.0\Maximise-Suffering.runtimeconfig.json
+D:\work\code\challenges\Maximise-Suffering\bin\Debug\net10.0\Maximise-Suffering.dll
+D:\work\code\challenges\Maximise-Suffering\bin\Debug\net10.0\Maximise-Suffering.pdb
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.GeneratedMSBuildEditorConfig.editorconfig
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.AssemblyInfoInputs.cache
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.AssemblyInfo.cs
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.csproj.CoreCompileInputs.cache
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.sourcelink.json
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.dll
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\refint\Maximise-Suffering.dll
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.pdb
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\Maximise-Suffering.genruntimeconfig.cache
+D:\work\code\challenges\Maximise-Suffering\obj\Debug\net10.0\ref\Maximise-Suffering.dll
