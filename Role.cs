@@ -75,6 +75,7 @@ public static class Data
         {
             //streamreader opens the file somhow
             StreamReader reader = new StreamReader(File.OpenRead(path));
+            int timeUnitLengthInMin = 0;
             int i = 0;
             //loop to make sure we loop through each line of the file until we get to the end
             while (!reader.EndOfStream)
@@ -86,14 +87,14 @@ public static class Data
                     break;
                 }
                 string[] values = line.Split(',');
-                if (i == 0) { GetDateTimeFromLine(values); }
+                if (i == 0) { GetDateTimeFromLine(values, timeUnitLengthInMin); }
                 else if (i == 1) { GetParticipantSchedule(values); }
                 else if (i == 2) { GetStaffSchedule(values, (i + 1) / 3); }
                 List<string[]> doc = new();
                 Console.WriteLine("Hello {0}", values[0]);
                 i++;
             }
-            //the stream must be closed
+            //the stream must be closed... FOREVER
             reader.Close();
         }
         else
@@ -101,31 +102,24 @@ public static class Data
             Console.WriteLine("The file doesn't exist");
         }
     }
-    public static DateTime? GetDateTimeFromLine(string[] values)
+    public static DateTime? GetDateTimeFromLine(string[] values, int )
     {
-        if (DateTime.TryParseExact(
-            values[0],
-            "d/M/yyyy",
-            CultureInfo.InvariantCulture,
-            DateTimeStyles.None,
-            out DateTime date))
+        if (DateOnly.TryParseExact(values[0],"d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
+        &&  TimeOnly.TryParseExact(values[1],"h:mm:ss tt",CultureInfo.InvariantCulture,DateTimeStyles.None, out TimeOnly startTime)
+        &&  TimeOnly.TryParseExact(values[1],"h:mm:ss tt",CultureInfo.InvariantCulture,DateTimeStyles.None, out TimeOnly nextTime))
         {
-            DateTime.TryParseExact(
-                values[1],
-                "d/M/yyyy",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out DateTime time)
-            return date;
+            DateTime startDateTime = startDate.ToDateTime(startTime);
+            int duration = (int)((nextTime.Ticks - startTime.Ticks)/ TimeSpan.TicksPerMinute);
+            return startDateTime;
         }
-        Errors.BroadcastErrorMessage("date wasn't inputted correctly, please use '=date(d,M,y)' on the A1 square in the gsheet");
+        Errors.BroadcastErrorMessage("date or time wasn't inputted correctly, please use '=date(d,M,y)' and '=time(h,m,s)' in the appropriate cells");
         return null;
     }
     public static void GetParticipantSchedule(string[] values)
     {
         if (values[0] == "Participants")
         {
-
+            while()
         }
     }
     public static void GetStaffSchedule(string[] values, int i)
