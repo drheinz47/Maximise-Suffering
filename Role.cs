@@ -50,7 +50,7 @@ public class Activity
     string title;
     DateTime startDateTime;
     int durationInTimeUnit;
-    int flexibilityInMin;
+    int flexibilityInTimeUnit;
     int difficultyRating;
     int amountOfPeopleNeeded;
 }
@@ -65,7 +65,7 @@ public static class Errors
 
 public static class Data
 {
-    public static string path = "ggg";
+    public static string path = "DataSheet.csv";
     public static List<Activity> participantActivities;
     public static List<Activity> staffActivities;
     public static void GetInfoFromCsv()
@@ -104,12 +104,12 @@ public static class Data
     }
     public static DateTime? GetDateTimeFromLine(string[] values, int )
     {
-        if (DateOnly.TryParseExact(values[0],"d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
-        &&  TimeOnly.TryParseExact(values[1],"h:mm:ss tt",CultureInfo.InvariantCulture,DateTimeStyles.None, out TimeOnly startTime)
-        &&  TimeOnly.TryParseExact(values[1],"h:mm:ss tt",CultureInfo.InvariantCulture,DateTimeStyles.None, out TimeOnly nextTime))
+        if (DateOnly.TryParseExact(values[0], "d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
+        && TimeOnly.TryParseExact(values[1], "h:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
+        && TimeOnly.TryParseExact(values[1], "h:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
         {
             DateTime startDateTime = startDate.ToDateTime(startTime);
-            int duration = (int)((nextTime.Ticks - startTime.Ticks)/ TimeSpan.TicksPerMinute);
+            int duration = (int)((nextTime.Ticks - startTime.Ticks) / TimeSpan.TicksPerMinute);
             return startDateTime;
         }
         Errors.BroadcastErrorMessage("date or time wasn't inputted correctly, please use '=date(d,M,y)' and '=time(h,m,s)' in the appropriate cells");
@@ -119,7 +119,7 @@ public static class Data
     {
         if (values[0] == "Participants")
         {
-            while()
+            while ()
         }
     }
     public static void GetStaffSchedule(string[] values, int i)
