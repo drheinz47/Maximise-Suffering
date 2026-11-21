@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Maximise-Suffering")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af43e260d0c8fb7143237eb95aef1009c14c1649")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4d85682b0a18988c864d262bf7e1c6caece67e31")]
 [assembly: System.Reflection.AssemblyProductAttribute("Maximise-Suffering")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Maximise-Suffering")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

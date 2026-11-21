@@ -47,17 +47,23 @@ public class Event
 
 public class Activity
 {
-    string title;
-    DateTime startDateTime;
-    int durationInTimeUnit;
-    int flexibilityInTimeUnit;
+    public string title;
+    public DateTime startDateTime;
+    //int durationInTimeUnit; possibly add it
+    public int flexibilityInTimeUnit;
+    public Activity(string title, DateTime startDateTime)
+    {
+        this.title = title;
+        this.startDateTime = startDateTime;
+    }
 }
 
-public class Task : Activity
+public class Job : Activity
 {
-    int difficultyRating;
-    int amountOfPeopleNeeded;
-    Skill[] skillsNeeded = new Skill[7];
+    public int difficultyRating;
+    public int staffCountNeeded;
+    public List<Skill> skillsNeeded = new();
+    public Job(string title, DateTime startDateTime) : base(title, startDateTime){}
 }
 
 public class Skill
