@@ -14,6 +14,7 @@ public static class Data
     public static List<Activity> participantActivities;
     public static List<Job?> staffActivities;
     public static int staffCount;
+    public static string[] timeformats = { "h:mm:ss tt", "h:mm:ss" };
     public static void GetInfoFromCsv()
     {
         //checks that the file exists
@@ -48,7 +49,7 @@ public static class Data
     }
     public static void GetDateTimeFromLine(string[] values)
     {
-        string[] timeformats = { "h:mm:ss tt", "h:mm:ss" };
+
         if (DateOnly.TryParseExact(values[0], "d/M/yyyy" , CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
         &&  TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
         &&  TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
@@ -101,33 +102,39 @@ public static class Data
     }
     public static void DefineJobInstances(string[] values, Section section)
     {
-        int temp = 0;
+        if (staffActivities == null) { return; }
+        int temp;
         for(int i = 1; i<values.Length; i++)
         {
             if (staffActivities[i] == null) { continue; }
-            else if (values[i] == ""){ Errors.BroadcastErrorMessage("invalid Task declaration" + section.ToString()); return; }
+            else if (values[i] == "" && section != Section.TASK_FLEXIBILITY){ Errors.BroadcastErrorMessage("invalid Task declaration" + section.ToString()); return; }
             if (section == Section.SKILLS_NEEDED)
             {
                 string[] skills = values[i].Split("/");
                 foreach (string skill in skills)
                 {
                     Skill skillNeeded = new(skill);
-
-                    staffActivities[i].skillsNeeded.Add(skillNeeded);
+                    staffActivities[i]!.skillsNeeded.Add(skillNeeded);
                 }
             }
             else if (section == Section.STAFF_COUNT)
             {
                 if (values[i] == "All") { temp = staffCount; }
-                else if(!int.TryParse(values[i], out temp)){ Errors.BroadcastErrorMessage("invalid Amount of Staff detected"); }
-                staffActivities[i].staffCountNeeded = temp;
+                else if (!int.TryParse(values[i], out temp)) { Errors.BroadcastErrorMessage("invalid Amount of Staff detected"); }
+                staffActivities[i]!.staffCountNeeded = temp;
             }
             else if (section == Section.TASK_DIFFICULTY)
             {
-                if(!int.TryParse(values[i], out temp)){ Errors.BroadcastErrorMessage("invalid Difficulty detected"); }
-                staffActivities[i].staffCountNeeded = temp;
+                if (!int.TryParse(values[i], out temp)) { Errors.BroadcastErrorMessage("invalid Difficulty detected"); }
+                staffActivities[i]!.difficultyRating = temp;
+            }
+            else if(section == Section.TASK_FLEXIBILITY)
+            {
+                if (values[i] == "" || values[i] == "none") { temp = staffCount; }
+                else if(TimeOnly.TryParseExact(values[i], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly latestStartTime))
+                { staffActivities[i]!.flexibilityInTimeUnit = (int)((latestStartTime.Ticks - startDateTime.Ticks)/TimeSpan.TicksPerMinute); }
             }
         }
     }
 }
-public enum Section{ STAFF_COUNT, TASK_DIFFICULTY, SKILLS_NEEDED}
+public enum Section{ STAFF_COUNT, TASK_DIFFICULTY, SKILLS_NEEDED, TASK_FLEXIBILITY}
