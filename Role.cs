@@ -10,9 +10,12 @@ using System.Text.RegularExpressions;
 
 public abstract class Role
 {
-    Schedule schedule = new();
+    PersonalSchedule personalSchedule = new();
 }
+public class Staff : Role
+{
 
+}
 public class Schedule
 {
     List<Activity> activities = new();
@@ -24,7 +27,7 @@ public class Schedule
 
 public class PersonalSchedule : Schedule
 {
-    List<bool> freeTimeUnits = new();
+    List<bool> freeTimeUnits = new(); //true means free
     public PersonalSchedule() : base()
     {
         // will do it later too
