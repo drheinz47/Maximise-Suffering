@@ -6,54 +6,53 @@ using System.Text.Json;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+namespace Maximise_Suffering;
 public static class DataInput
 {
-    public static string path = "DataSheet.csv";
     public static DateTime startDateTime;
     public static int timeUnitLengthInMin;
-    public static List<Activity> participantActivities;
-    public static List<Job?> staffActivities;
+
     public static int staffCount;
-    public static List<Staff> staffList;
+    public static List<Staff> staffList = [];
+    public static List<Job?> staffActivities = [];
+    public static List<Activity> participantActivities = [];
+
+    public static string eventSheetPath = "EventDataSheet.csv";
+    public static string staffSheetPath = "StaffDataSheet.csv";
     public static string[] timeformats = { "h:mm:ss tt", "h:mm:ss" };
+
     public static void GetInfoFromCsv()
     {
         //checks that the file exists
-        if (File.Exists(path))
+        if (File.Exists(eventSheetPath)) { InterpretCsvFile(eventSheetPath); }
+        else { Errors.BroadcastErrorMessage("The" + eventSheetPath + "file doesn't exist"); }
+        if (File.Exists(staffSheetPath)) { InterpretCsvFile(staffSheetPath); }
+        else { Errors.BroadcastErrorMessage("The" + staffSheetPath + "file doesn't exist"); }
+    }
+    public static void InterpretCsvFile(string path)
+    {
+        int i = 0;
+        StreamReader reader = new(File.OpenRead(path));
+        //treat each line as its own set of input and chop all their heads one by one
+        while (!reader.EndOfStream)
         {
-            //streamreader opens the file somhow
-            StreamReader reader = new StreamReader(File.OpenRead(path));
-            int i = 0;
-            //loop to make sure we loop through each line of the file until we get to the end
-            while (!reader.EndOfStream)
-            {
-                //access each line as it's read in
-                string? line = reader.ReadLine();
-                if (line == null)
-                {
-                    break;
-                }
-                string[] values = line.Split(',');
-                if (i == 0) { GetDateTimeFromLine(values); }
-                else if (i == 1) { GetParticipantSchedule(values); }
-                else if (i >= 2) { GetStaffSchedule(values, (i + 1) / 4); }
-                Console.WriteLine("Hello {0}", values[0]); //test
-                i++;
-            }
-            //the stream must be closed... FOREVER
-            reader.Close();
+            string? line = reader.ReadLine();
+            if (line == null) { return; }
+            string[] values = line.Split(',');
+            if (path == "StaffDataSheet.csv") { GetInfoFromPersonalSchedule(values); }
+            else if (i == 0) { GetDateTimeFromLine(values); }
+            else if (i == 1) { GetParticipantSchedule(values); }
+            else { GetStaffSchedule(values, (i + 1) / 4); }
+            i++;
         }
-        else
-        {
-            Console.WriteLine("The file doesn't exist");
-        }
+        reader.Close(); //the stream must be closed... FOREVER
     }
     public static void GetDateTimeFromLine(string[] values)
     {
 
-        if (DateOnly.TryParseExact(values[0], "d/M/yyyy" , CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
-        &&  TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
-        &&  TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
+        if (DateOnly.TryParseExact(values[0], "d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
+        && TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
+        && TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
         {
             startDateTime = startDate.ToDateTime(startTime);
             timeUnitLengthInMin = (int)((nextTime.Ticks - startTime.Ticks) / TimeSpan.TicksPerMinute);
@@ -92,13 +91,13 @@ public static class DataInput
     }
     public static void CreateJobInstances(string[] values, bool isStaff)
     {
-        for(int i = 1; i<values.Length; i++)
+        for (int i = 1; i < values.Length; i++)
         {
-            if(values[i] == ""){ staffActivities.Add(null); continue; }
-            DateTime currentDateTime = startDateTime.AddMinutes(timeUnitLengthInMin * (i-1));
+            if (values[i] == "") { staffActivities.Add(null); continue; }
+            DateTime currentDateTime = startDateTime.AddMinutes(timeUnitLengthInMin * (i - 1));
             Job job = new(values[i], currentDateTime);
             if (isStaff) { staffActivities.Add(job); }
-            else   { participantActivities.Add(job); }
+            else { participantActivities.Add(job); }
         }
     }
     public static void DefineJobInstances(string[] values, Section section)
@@ -137,14 +136,14 @@ public static class DataInput
             }
         }
     }
-    public static void GetInfoFromPersonalSchedule()
+    public static void GetInfoFromPersonalSchedule(string[] values)
     {
         Staff staff = new Staff();
         for (int i = 1; i < values.Length; i++)
         {
             if (values[i] == "busy") { staff.personalSchedule.freeTimeUnits.Add(false); }
             else if (values[i] == "") { staff.personalSchedule.freeTimeUnits.Add(true); }
-            else{ Errors.BroadcastErrorMessage("invalid personal schedule, please fill it with either busy or leave it empty");}
+            else { Errors.BroadcastErrorMessage("invalid personal schedule, please fill it with either busy or leave it empty"); }
         }
         staffList.Add(staff);
     }

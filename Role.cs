@@ -6,11 +6,10 @@ using System.Text.Json;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-
-
+namespace Maximise_Suffering;
 public abstract class Role
 {
-    PersonalSchedule personalSchedule = new();
+    public PersonalSchedule personalSchedule = new();
 }
 public class Staff : Role
 {
@@ -18,16 +17,17 @@ public class Staff : Role
 }
 public class Schedule
 {
-    List<Activity> activities = new();
+    public List<Activity> activities = new();
     public Schedule()
     {
         // will do it later
     }
 }
 
-public class PersonalSchedule : Schedule
+public class PersonalSchedule
 {
-    List<bool> freeTimeUnits = new(); //true means free
+    public List<Job> jobs = new();
+    public List<bool> freeTimeUnits = new(); //true means free
     public PersonalSchedule() : base()
     {
         // will do it later too

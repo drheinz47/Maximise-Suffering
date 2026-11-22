@@ -3,3 +3,4 @@ root = true
 [*.cs]
 dotnet_diagnostic.CA1050.severity = none
 dotnet_diagnostic.IDE0300.severity = none
+dotnet_diagnostic.CA2211.severity = none
