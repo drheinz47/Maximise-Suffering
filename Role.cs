@@ -70,7 +70,16 @@ public class Skill
 {
     string name;
     int level;
-
+    public Skill(string name)
+    {
+        this.name = name;
+        level = 0;
+    }
+    public Skill(string name, int level)
+    {
+        this.name = name;
+        this.level = level;
+    }
 }
 
 public static class Errors

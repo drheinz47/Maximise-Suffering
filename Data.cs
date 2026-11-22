@@ -12,8 +12,8 @@ public static class Data
     public static DateTime startDateTime;
     public static int timeUnitLengthInMin;
     public static List<Activity> participantActivities;
+    public static List<Job?> staffActivities;
     public static int staffCount;
-    public static List<Job> staffActivities;
     public static void GetInfoFromCsv()
     {
         //checks that the file exists
@@ -49,9 +49,9 @@ public static class Data
     public static void GetDateTimeFromLine(string[] values)
     {
         string[] timeformats = { "h:mm:ss tt", "h:mm:ss" };
-        if (DateOnly.TryParseExact(values[0], "d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
-        && TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
-        && TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
+        if (DateOnly.TryParseExact(values[0], "d/M/yyyy" , CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
+        &&  TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
+        &&  TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
         {
             startDateTime = startDate.ToDateTime(startTime);
             timeUnitLengthInMin = (int)((nextTime.Ticks - startTime.Ticks) / TimeSpan.TicksPerMinute);
@@ -62,49 +62,72 @@ public static class Data
     {
         if (values[0] == "Participants")
         {
-            while ()
+            CreateJobInstances(values, false);
         }
     }
     public static void GetStaffSchedule(string[] values, int ind)
     {
         if (Regex.IsMatch(values[0], @"^StaffTasks 0*" + ind + @"$"))
         {
-            int i = 0;
-            foreach(string value in values)
-            {
-                DateTime currentDateTime = startDateTime.AddMinutes(timeUnitLengthInMin * i);
-                Job job = new(value, currentDateTime);
-                staffActivities.Add(job);
-                i++;
-            }
-
+            CreateJobInstances(values, true);
         }
         else if (values[0] == "RequiredStaffCount")
         {
-            int i = 0;
-            int neededStaff = 0;
-            foreach(string value in values)
-            {
-                if (value == "All") { neededStaff = staffCount; }
-                else if(!int.TryParse(value, out neededStaff)) { Errors.BroadcastErrorMessage("invalid Amount of Staff detected"); }
-                staffActivities[i].staffCountNeeded = neededStaff;
-                i++;
-            }
+            DefineJobInstances(values, Section.STAFF_COUNT);
         }
         else if (values[0] == "TaskDifficulty")
         {
-            int i = 0;
-            int difficulty = 0;
-            foreach(string value in values)
-            {
-                if(!int.TryParse(value, out difficulty)){ Errors.BroadcastErrorMessage("invalid Task Difficulty detected");}
-                staffActivities[i].staffCountNeeded = difficulty;
-                i++;
-            }
+            DefineJobInstances(values, Section.TASK_DIFFICULTY);
+        }
+        else if (values[0] == "SkillsNeeded")
+        {
+            DefineJobInstances(values, Section.SKILLS_NEEDED);
         }
         else
         {
             Errors.BroadcastErrorMessage("something went wrong >:(");
         }
     }
+    public static void CreateJobInstances(string[] values, bool isStaff)
+    {
+        for(int i = 1; i<values.Length; i++)
+        {
+            if(values[i] == ""){ staffActivities.Add(null); continue; }
+            DateTime currentDateTime = startDateTime.AddMinutes(timeUnitLengthInMin * (i-1));
+            Job job = new(values[i], currentDateTime);
+            if (isStaff) { staffActivities.Add(job); }
+            else   { participantActivities.Add(job); }
+        }
+    }
+    public static void DefineJobInstances(string[] values, Section section)
+    {
+        int temp = 0;
+        for(int i = 1; i<values.Length; i++)
+        {
+            if (staffActivities[i] == null) { continue; }
+            else if (values[i] == ""){ Errors.BroadcastErrorMessage("invalid Task declaration" + section.ToString()); return; }
+            if (section == Section.SKILLS_NEEDED)
+            {
+                string[] skills = values[i].Split("/");
+                foreach (string skill in skills)
+                {
+                    Skill skillNeeded = new(skill);
+
+                    staffActivities[i].skillsNeeded.Add(skillNeeded);
+                }
+            }
+            else if (section == Section.STAFF_COUNT)
+            {
+                if (values[i] == "All") { temp = staffCount; }
+                else if(!int.TryParse(values[i], out temp)){ Errors.BroadcastErrorMessage("invalid Amount of Staff detected"); }
+                staffActivities[i].staffCountNeeded = temp;
+            }
+            else if (section == Section.TASK_DIFFICULTY)
+            {
+                if(!int.TryParse(values[i], out temp)){ Errors.BroadcastErrorMessage("invalid Difficulty detected"); }
+                staffActivities[i].staffCountNeeded = temp;
+            }
+        }
+    }
 }
+public enum Section{ STAFF_COUNT, TASK_DIFFICULTY, SKILLS_NEEDED}
