@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Linq;
-using System.Text.Json;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -32,6 +27,7 @@ public static class DataInput
     public static void InterpretCsvFile(string path)
     {
         int i = 0;
+        int setSize = 0;
         StreamReader reader = new(File.OpenRead(path));
         //treat each line as its own set of input and chop all their heads one by one
         while (!reader.EndOfStream)
@@ -42,14 +38,13 @@ public static class DataInput
             if (path == "StaffDataSheet.csv") { GetInfoFromPersonalSchedule(values); }
             else if (i == 0) { GetDateTimeFromLine(values); }
             else if (i == 1) { GetParticipantSchedule(values); }
-            else { GetStaffSchedule(values, (i + 1) / 4); }
-            i++;
+            else { if ((i - 2)%5==0) { setSize += values.Length; }
+                 GetStaffSchedule(values, (i - 2) / 5, setSize); }  i++;
         }
         reader.Close(); //the stream must be closed... FOREVER
     }
     public static void GetDateTimeFromLine(string[] values)
     {
-
         if (DateOnly.TryParseExact(values[0], "d/M/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)
         && TimeOnly.TryParseExact(values[1], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime)
         && TimeOnly.TryParseExact(values[2], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly nextTime))
@@ -66,7 +61,7 @@ public static class DataInput
             CreateJobInstances(values, false);
         }
     }
-    public static void GetStaffSchedule(string[] values, int ind)
+    public static void GetStaffSchedule(string[] values, int ind, int setSize)
     {
         if (Regex.IsMatch(values[0], @"^StaffTasks 0*" + ind + @"$"))
         {
@@ -74,15 +69,15 @@ public static class DataInput
         }
         else if (values[0] == "RequiredStaffCount")
         {
-            DefineJobInstances(values, Section.STAFF_COUNT);
+            DefineJobInstances(values, Section.STAFF_COUNT, setSize);
         }
         else if (values[0] == "TaskDifficulty")
         {
-            DefineJobInstances(values, Section.TASK_DIFFICULTY);
+            DefineJobInstances(values, Section.TASK_DIFFICULTY, setSize);
         }
         else if (values[0] == "SkillsNeeded")
         {
-            DefineJobInstances(values, Section.SKILLS_NEEDED);
+            DefineJobInstances(values, Section.SKILLS_NEEDED, setSize);
         }
         else
         {
@@ -100,13 +95,13 @@ public static class DataInput
             else { participantActivities.Add(job); }
         }
     }
-    public static void DefineJobInstances(string[] values, Section section)
+    public static void DefineJobInstances(string[] values, Section section, int setSize)
     {
         if (staffActivities == null) { return; }
         int temp;
         for (int i = 1; i < values.Length; i++)
         {
-            if (staffActivities[i] == null) { continue; }
+            if (staffActivities[i+setSize] == null) { continue; }
             else if (values[i] == "" && section != Section.TASK_FLEXIBILITY) { Errors.BroadcastErrorMessage("invalid Task declaration" + section.ToString()); return; }
             if (section == Section.SKILLS_NEEDED)
             {
@@ -114,25 +109,25 @@ public static class DataInput
                 foreach (string skill in skills)
                 {
                     Skill skillNeeded = new(skill);
-                    staffActivities[i]!.skillsNeeded.Add(skillNeeded);
+                    staffActivities[i+setSize]!.skillsNeeded.Add(skillNeeded);
                 }
             }
             else if (section == Section.STAFF_COUNT)
             {
                 if (values[i] == "All") { temp = staffCount; }
                 else if (!int.TryParse(values[i], out temp)) { Errors.BroadcastErrorMessage("invalid Amount of Staff detected"); }
-                staffActivities[i]!.staffCountNeeded = temp;
+                staffActivities[i+setSize]!.staffCountNeeded = temp;
             }
             else if (section == Section.TASK_DIFFICULTY)
             {
                 if (!int.TryParse(values[i], out temp)) { Errors.BroadcastErrorMessage("invalid Difficulty detected"); }
-                staffActivities[i]!.difficultyRating = temp;
+                staffActivities[i+setSize]!.difficultyRating = temp;
             }
             else if (section == Section.TASK_FLEXIBILITY)
             {
                 if (values[i] == "" || values[i] == "none") { temp = staffCount; }
                 else if (TimeOnly.TryParseExact(values[i], timeformats, CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly latestStartTime))
-                { staffActivities[i]!.flexibilityInTimeUnit = (int)((latestStartTime.Ticks - startDateTime.Ticks) / TimeSpan.TicksPerMinute); }
+                { staffActivities[i+setSize]!.flexibilityInTimeUnit = (int)((latestStartTime.Ticks - startDateTime.Ticks) / TimeSpan.TicksPerMinute); }
             }
         }
     }

@@ -1,21 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Linq;
-using System.Text.Json;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Maximise_Suffering;
 public abstract class Role
 {
-    public string name = "";
     public PersonalSchedule personalSchedule = new();
 }
 public class Staff : Role
-{}
+{
+    public string name = "";
+    public float workload;
+}
 public class Schedule
 {
+
     public List<Activity> activities = new();
     public Schedule()
     {
