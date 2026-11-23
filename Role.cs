@@ -9,12 +9,11 @@ using System.Text.RegularExpressions;
 namespace Maximise_Suffering;
 public abstract class Role
 {
+    public string name = "";
     public PersonalSchedule personalSchedule = new();
 }
 public class Staff : Role
-{
-
-}
+{}
 public class Schedule
 {
     public List<Activity> activities = new();
@@ -30,7 +29,11 @@ public class PersonalSchedule
     public List<bool> freeTimeUnits = new(); //true means free
     public PersonalSchedule() : base()
     {
-        // will do it later too
+
+    }
+    public void SortByDateTime()
+    {
+        jobs.Sort((x1, x2) => DateTime.Compare(x1.startDateTime, x2.startDateTime));
     }
 }
 
